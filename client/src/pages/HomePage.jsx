@@ -24,8 +24,9 @@ function HomePage() {
 
   const deleteProduct = async (productId) => {
     await axios.delete(`http://localhost:4001/products/${productId}`);
-    const newProducts = products.filter((product) => product.id !== productId);
-    setProducts(newProducts);
+    // const newProducts = products.filter((product) => product.id !== productId);
+    // setProducts(newProducts);
+    getProducts();
   };
 
   useEffect(() => {
@@ -75,12 +76,7 @@ function HomePage() {
           return (
             <div className="product" key={product._id}>
               <div className="product-preview">
-                <img
-                  src={product.image}
-                  alt="some product"
-                  width="250"
-                  height="250"
-                />
+                <img src={product.image} alt="some product" width="250" height="250" />
               </div>
               <div className="product-detail">
                 <h1>Product name: {product.name} </h1>
