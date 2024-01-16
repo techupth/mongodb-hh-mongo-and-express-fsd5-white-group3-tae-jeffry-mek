@@ -6,13 +6,35 @@ import { db } from "../utils/db.js";
 const productRouter = Router();
 
 //GET
+// Pagination
 productRouter.get("/", async (req, res) => {
   try {
+    const name = req.query.keywords;
+    const category = req.query.category;
+    const page = parseInt(req.query.page) || 1; // default page is 1
+    const limit = parseInt(req.query.limit) || 5; // default limit is 5
+
+    const query = {};
+
+    if (name) {
+      query.name = new RegExp(name, "i");
+    }
+
+    if (category) {
+      query.category = new RegExp(category, "i");
+    }
+
     const collection = db.collection("products");
 
-    const products = await collection.find({}).limit(10).toArray();
+    const allProducts = await collection.find(query).toArray();
 
-    return res.json({ data: products });
+    const products = await collection
+      .find(query)
+      .skip((page - 1) * limit)
+      .limit(limit)
+      .toArray();
+
+    return res.json({ data: products, total: allProducts.length });
   } catch (error) {
     return res.json({
       message: `${error}`,
@@ -42,6 +64,8 @@ productRouter.post("/", async (req, res) => {
     const collection = db.collection("products");
 
     const productData = { ...req.body, created_at: new Date() };
+    console.log("Received product data:", productData);
+
     const newProductData = await collection.insertOne(productData);
     return res.json({
       message: `Product Id (${newProductData.insertedId}) has been created successfully`,

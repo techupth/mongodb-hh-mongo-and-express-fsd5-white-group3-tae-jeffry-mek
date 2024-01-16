@@ -7,6 +7,7 @@ function CreateProductForm() {
   const [imageUrl, setImageUrl] = useState("");
   const [price, setPrice] = useState("");
   const [description, setDescription] = useState("");
+  const [category, setCategory] = useState("");
 
   const navigate = useNavigate();
 
@@ -16,7 +17,9 @@ function CreateProductForm() {
       image: imageUrl,
       price,
       description,
+      category,
     });
+    console.log("Sent product data:", { name, imageUrl, price, description, category });
     navigate("/");
   };
 
@@ -94,13 +97,18 @@ function CreateProductForm() {
       <div className="input-container">
         <label>
           Category
-          <select id="category" name="category" value="it">
+          <select
+            id="category"
+            name="category"
+            value={category}
+            onChange={(event) => setCategory(event.target.value)}
+          >
             <option disabled value="">
               -- Select a category --
             </option>
-            <option value="it">IT</option>
-            <option value="fashion">Fashion</option>
-            <option value="food">Food</option>
+            <option value="It">IT</option>
+            <option value="Fashion">Fashion</option>
+            <option value="Food">Food</option>
           </select>
         </label>
       </div>

@@ -8,13 +8,21 @@ function HomePage() {
   const [products, setProducts] = useState([]);
   const [isError, setIsError] = useState(null);
   const [isLoading, setIsLoading] = useState(null);
+  const [searchText, setSearchText] = useState("");
+  const [category, setCategory] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
-  const getProducts = async () => {
+  const getProducts = async (page = 1) => {
     try {
       setIsError(false);
       setIsLoading(true);
-      const results = await axios("http://localhost:4001/products");
+      const results = await axios.get(
+        `http://localhost:4001/products?keywords=${searchText}&category=${category}&page=${page}&limit=5`
+      );
+      console.log("Total items from API response:", results.data.total);
       setProducts(results.data.data);
+      setTotalPages(Math.ceil(results.data.total / 5));
       setIsLoading(false);
     } catch (error) {
       setIsLoading(false);
@@ -29,9 +37,24 @@ function HomePage() {
     getProducts();
   };
 
+  const handleSearchText = (event) => {
+    event.preventDefault();
+    setSearchText(event.target.value);
+  };
+
+  const handleCategory = (event) => {
+    setCategory(event.target.value);
+  };
+
+  // Pagination
+  const handlePaginationClick = (newPage) => {
+    setCurrentPage(newPage);
+    getProducts(newPage);
+  };
+
   useEffect(() => {
-    getProducts();
-  }, []);
+    getProducts(currentPage);
+  }, [searchText, category, currentPage]);
 
   return (
     <div>
@@ -49,19 +72,19 @@ function HomePage() {
         <div className="search-box">
           <label>
             Search product
-            <input type="text" placeholder="Search by name" />
+            <input type="text" placeholder="Search by name" onChange={handleSearchText} />
           </label>
         </div>
         <div className="category-filter">
           <label>
             View Category
-            <select id="category" name="category" value="it">
+            <select id="category" name="category" value={category} onChange={handleCategory}>
               <option disabled value="">
                 -- Select a category --
               </option>
-              <option value="it">IT</option>
-              <option value="fashion">Fashion</option>
-              <option value="food">Food</option>
+              <option value="IT">IT</option>
+              <option value="Fashion">Fashion</option>
+              <option value="Food">Food</option>
             </select>
           </label>
         </div>
@@ -81,7 +104,7 @@ function HomePage() {
               <div className="product-detail">
                 <h1>Product name: {product.name} </h1>
                 <h2>Product price: {product.price}</h2>
-                <h3>Category: IT</h3>
+                <h3>Category: {product.category}</h3>
                 <h3>Created Time: 1 Jan 2011, 00:00:00</h3>
                 <p>Product description: {product.description} </p>
                 <div className="product-actions">
@@ -120,10 +143,22 @@ function HomePage() {
       </div>
 
       <div className="pagination">
-        <button className="previous-button">Previous</button>
-        <button className="next-button">Next</button>
+        <button
+          className="previous-button"
+          onClick={() => handlePaginationClick(currentPage - 1)}
+          disabled={currentPage === 1}
+        >
+          Previous
+        </button>
+        <button
+          className="next-button"
+          onClick={() => handlePaginationClick(currentPage + 1)}
+          disabled={currentPage === totalPages}
+        >
+          Next
+        </button>
       </div>
-      <div className="pages">1/ total page</div>
+      <div className="pages">{`${currentPage}/${totalPages} pages`}</div>
     </div>
   );
 }
