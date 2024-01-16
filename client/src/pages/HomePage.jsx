@@ -44,6 +44,7 @@ function HomePage() {
 
   const handleCategory = (event) => {
     setCategory(event.target.value);
+    setCurrentPage(1);
   };
 
   // Pagination
